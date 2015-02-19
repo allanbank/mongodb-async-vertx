@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/allanbank/mongodb-async-driver.svg?branch=master)](https://travis-ci.org/allanbank/mongodb-async-vertx)
+[![Build Status](https://travis-ci.org/allanbank/mongodb-async-vertx.svg?branch=master)](https://travis-ci.org/allanbank/mongodb-async-vertx)
 MongoDB Asynchronous Java Driver Adapter for Vert.x
 =============================================
 
