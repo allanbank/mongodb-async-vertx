@@ -25,6 +25,8 @@ import static com.allanbank.mongodb.bson.builder.BuilderFactory.e;
 import static com.allanbank.mongodb.vertx.Converter.convert;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -60,6 +62,7 @@ import com.allanbank.mongodb.bson.json.Json;
 import com.allanbank.mongodb.builder.Aggregate;
 import com.allanbank.mongodb.builder.Find;
 import com.allanbank.mongodb.builder.FindAndModify;
+import com.allanbank.mongodb.builder.ListCollections;
 import com.allanbank.mongodb.util.IOUtils;
 import com.allanbank.mongodb.util.log.Log;
 import com.allanbank.mongodb.util.log.LogFactory;
@@ -567,18 +570,13 @@ public class MongoPersistor extends BusModBase implements
 
     /**
      * Performs the {@code get_collections} action.
-     * <p>
-     * TODO - This method is not async.
-     * </p>
      * 
      * @param message
      *            The original message.
      */
-    protected void doListCollectionNames(Message<JsonObject> message) {
-        JsonObject reply = new JsonObject();
-        reply.putArray("collections", new JsonArray(myDatabase
-                .listCollectionNames().toArray()));
-        sendOK(message, reply);
+    protected void doListCollectionNames(final Message<JsonObject> message) {
+        myDatabase.stream(new ListCollectionNamesCallback(message),
+                ListCollections.builder().build());
     }
 
     /**
@@ -797,6 +795,70 @@ public class MongoPersistor extends BusModBase implements
             String host = address.getString("host");
             int port = address.getInteger("port");
             mongodbConfig.addServer(new InetSocketAddress(host, port));
+        }
+    }
+
+    /**
+     * ListCollectionNamesCallback provides the logic to handle the stream of
+     * documents returned for the collection names.
+     * 
+     * @api.no This class is <b>NOT</b> part of the drivers API. This class may
+     *         be mutated in incompatible ways between any two releases of the
+     *         driver.
+     * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
+     */
+    protected final class ListCollectionNamesCallback implements
+            StreamCallback<Document> {
+
+        /** The request message. */
+        private final Message<JsonObject> myMessage;
+
+        /** The collected names. */
+        private final List<String> myNames = new ArrayList<String>();
+
+        /**
+         * Creates a new ListCollectionNamesCallback.
+         * 
+         * @param message
+         *            The request message.
+         */
+        public ListCollectionNamesCallback(Message<JsonObject> message) {
+            myMessage = message;
+        }
+
+        /**
+         * Callback for a single collection document. Extracts the name of the
+         * collection for later use.
+         * 
+         * @param result
+         *            The collection document.
+         */
+        @Override
+        public void callback(Document result) {
+            myNames.add(result.findFirst("name").getValueAsString());
+        }
+
+        /**
+         * We report the error to the caller.
+         * 
+         * @param thrown
+         *            The error encountered.
+         */
+        @Override
+        public void exception(Throwable thrown) {
+            sendError(myMessage, thrown);
+        }
+
+        /**
+         * Called after the last document is received. Notifies the caller with
+         * all of the collected collection names.
+         */
+        @Override
+        public void done() {
+            JsonObject reply = new JsonObject();
+            reply.putArray("collections", new JsonArray(myDatabase
+                    .listCollectionNames().toArray()));
+            sendOK(myMessage, reply);
         }
     }
 
