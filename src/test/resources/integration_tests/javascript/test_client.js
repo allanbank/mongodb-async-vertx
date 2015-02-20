@@ -757,7 +757,7 @@ function noTestAggregate() {
 }
 
 
-function testSinglePipelineAggregation() {
+function noTestSinglePipelineAggregation() {
   eb.send('test.persistor', {
     collection: 'testcities',
     action: 'aggregate',
