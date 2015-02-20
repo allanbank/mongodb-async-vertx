@@ -425,9 +425,14 @@
 				<updatePolicy>always</updatePolicy>
 				<checksumPolicy>warn</checksumPolicy>
 			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>warn</checksumPolicy>
+			</snapshots>
 			<id>allanbank</id>
 			<name>Allanbank Releases</name>
-			<url>http://www.allanbank.com/public_html/repo/</url>
+			<url>http://www.allanbank.com/repo/</url>
 			<layout>default</layout>
 		</repository>
 	</repositories>
