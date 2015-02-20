@@ -130,7 +130,7 @@ public class Converter {
 
                 array.addObject(new JsonObject().putString("$binary",
                         IOUtils.toBase64(binary.getValue())).putString("$type",
-                                Integer.toHexString(binary.getSubType())));
+                        Integer.toHexString(binary.getSubType())));
                 break;
             }
             case BOOLEAN: {
@@ -258,8 +258,8 @@ public class Converter {
                         e.getName(),
                         new JsonObject().putString("$binary",
                                 IOUtils.toBase64(binary.getValue())).putString(
-                                        "$type",
-                                        Integer.toHexString(binary.getSubType())));
+                                "$type",
+                                Integer.toHexString(binary.getSubType())));
                 break;
             }
             case BOOLEAN: {
@@ -315,7 +315,7 @@ public class Converter {
 
                 obj.putObject(e.getName(), new JsonObject().putObject(
                         "$timestamp", new JsonObject().putNumber("t", time)
-                        .putNumber("i", increment)));
+                                .putNumber("i", increment)));
                 break;
             }
             case NULL: {
@@ -337,7 +337,7 @@ public class Converter {
 
                 obj.putObject(e.getName(),
                         new JsonObject().putString("$regex", pattern)
-                        .putString("$options", options));
+                                .putString("$options", options));
                 break;
             }
             case STRING: {
@@ -440,7 +440,7 @@ public class Converter {
             // "$binary", "$type"
             return new BinaryElement(fieldName, (byte) Integer.parseInt(
                     json.getString("$type"), 16), IOUtils.base64ToBytes(json
-                            .getString("$binary")));
+                    .getString("$binary")));
         }
         else if (DATE_FIELDS.equals(fieldNames)) {
             // $date

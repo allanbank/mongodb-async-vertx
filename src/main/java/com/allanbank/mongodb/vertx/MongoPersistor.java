@@ -938,8 +938,8 @@ Handler<Message<JsonObject>> {
         @Override
         public void done() {
             final JsonObject reply = new JsonObject();
-            reply.putArray("collections", new JsonArray(myDatabase
-                    .listCollectionNames().toArray()));
+            reply.putArray("collections",
+                    new JsonArray(myNames.toArray(new String[myNames.size()])));
             sendOK(myMessage, reply);
         }
 

@@ -35,8 +35,12 @@ import org.vertx.testtools.TestVerticleInfo;
  */
 @TestVerticleInfo(filenameFilter = ".+\\.js", funcRegex = "function[\\s]+(test[^\\s(]+)")
 @RunWith(ScriptClassRunner.class)
-public class JavaScriptIntegrationTests {
+public class JavaScriptTests {
+    /**
+     * Dummy tests so JUnit picks up the suite to run.
+     */
     @Test
     public void __vertxDummy() {
+        // Empty.
     }
 }

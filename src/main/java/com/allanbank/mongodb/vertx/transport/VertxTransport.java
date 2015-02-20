@@ -190,7 +190,7 @@ import com.allanbank.mongodb.util.log.LogFactory;
      */
     @Override
     public void send(final VertxOutputBuffer buffer) throws IOException,
-    InterruptedIOException {
+            InterruptedIOException {
         myNetSocket.write(buffer.getBuffer());
     }
 
@@ -216,6 +216,6 @@ import com.allanbank.mongodb.util.log.LogFactory;
         final InetSocketAddress local = myNetSocket.localAddress();
 
         return "MongoDB(" + local.getPort() + "-->"
-        + myNetSocket.remoteAddress() + ")";
+                + myNetSocket.remoteAddress() + ")";
     }
 }

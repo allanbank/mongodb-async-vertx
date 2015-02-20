@@ -38,23 +38,23 @@ public abstract class PersistorTestParent extends TestVerticle {
         final JsonObject config = getConfig();
         container.deployModule(System.getProperty("vertx.modulename"), config,
                 1, new AsyncResultHandler<String>() {
-                    @Override
-                    public void handle(final AsyncResult<String> result) {
-                        if (result.succeeded()) {
-                            PersistorTestParent.super.start();
-                        }
-                        else {
-                            result.cause().printStackTrace();
-                        }
-                    }
-                });
+            @Override
+            public void handle(final AsyncResult<String> result) {
+                if (result.succeeded()) {
+                    PersistorTestParent.super.start();
+                }
+                else {
+                    result.cause().printStackTrace();
+                }
+            }
+        });
     }
 
     protected void deleteAll(final Handler<Message<JsonObject>> handler) {
         final JsonObject matcher = new JsonObject("{}");
         final JsonObject query = new JsonObject()
-                .putString("collection", COLLECTION)
-                .putString("action", "delete").putObject("matcher", matcher);
+        .putString("collection", COLLECTION)
+        .putString("action", "delete").putObject("matcher", matcher);
 
         eb.send(ADDRESS, query, handler);
     }

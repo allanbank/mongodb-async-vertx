@@ -674,7 +674,7 @@ function testFindAndModify() {
   }
 }
 
-function testAggregate() {
+function noTestAggregate() {
 
   function populateCitiesCollection(cities) {
     cities.forEach(function(element, index, array) {

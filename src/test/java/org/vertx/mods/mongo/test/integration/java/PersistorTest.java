@@ -58,13 +58,13 @@ public class PersistorTest extends PersistorTestParent {
                 final AtomicInteger count = new AtomicInteger(0);
                 for (int i = 0; i < numDocs; i++) {
                     final JsonObject doc = new JsonObject()
-                            .putString("name", "joe bloggs")
-                            .putNumber("age", 40).putString("cat-name", "watt");
+                    .putString("name", "joe bloggs")
+                    .putNumber("age", 40).putString("cat-name", "watt");
 
                     final JsonObject json = new JsonObject()
-                            .putString("collection", COLLECTION)
-                            .putString("action", "save")
-                            .putObject("document", doc);
+                    .putString("collection", COLLECTION)
+                    .putString("action", "save")
+                    .putObject("document", doc);
 
                     eb.send(ADDRESS, json, new Handler<Message<JsonObject>>() {
                         @Override
@@ -72,28 +72,28 @@ public class PersistorTest extends PersistorTestParent {
                             assertEquals("ok", reply.body().getString("status"));
                             if (count.incrementAndGet() == numDocs) {
                                 final JsonObject matcher = new JsonObject()
-                                        .putString("name", "joe bloggs");
+                                .putString("name", "joe bloggs");
 
                                 final JsonObject json = new JsonObject()
-                                        .putString("collection", COLLECTION)
-                                        .putString("action", "find")
-                                        .putObject("matcher", matcher);
+                                .putString("collection", COLLECTION)
+                                .putString("action", "find")
+                                .putObject("matcher", matcher);
 
                                 eb.send(ADDRESS, json,
                                         new Handler<Message<JsonObject>>() {
-                                            @Override
-                                            public void handle(
-                                                    final Message<JsonObject> reply) {
-                                                assertEquals("ok", reply.body()
-                                                        .getString("status"));
-                                                final JsonArray results = reply
-                                                        .body().getArray(
-                                                                "results");
-                                                assertEquals(numDocs,
-                                                        results.size());
-                                                testComplete();
-                                            }
-                                        });
+                                    @Override
+                                    public void handle(
+                                            final Message<JsonObject> reply) {
+                                        assertEquals("ok", reply.body()
+                                                .getString("status"));
+                                        final JsonArray results = reply
+                                                .body().getArray(
+                                                        "results");
+                                        assertEquals(numDocs,
+                                                results.size());
+                                        testComplete();
+                                    }
+                                });
                             }
                         }
                     });

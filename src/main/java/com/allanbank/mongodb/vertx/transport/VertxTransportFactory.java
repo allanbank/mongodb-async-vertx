@@ -68,7 +68,7 @@ public class VertxTransportFactory implements TransportFactory {
             final StringEncoderCache encoderCache,
             final StringDecoderCache decoderCache,
             final TransportResponseListener responseListener)
-            throws IOException {
+                    throws IOException {
 
         return new VertxTransport(server, config, encoderCache, decoderCache,
                 responseListener, createNetClient(config));

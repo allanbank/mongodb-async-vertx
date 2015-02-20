@@ -65,7 +65,7 @@ public class MongoTypesTest extends PersistorTestParent {
                 final JsonObject matcher = new JsonObject().putObject("data",
                         new JsonObject().putObject("$elemMatch",
                                 new JsonObject().putNumber("$gte", 0)
-                                .putNumber("$lt", 5)));
+                                        .putNumber("$lt", 5)));
 
                 final JsonObject query = createMatcher(matcher);
 
@@ -171,14 +171,14 @@ public class MongoTypesTest extends PersistorTestParent {
 
     private JsonObject createMatcher(final JsonObject matcher) {
         return new JsonObject()
-        .putString("collection", PersistorTestParent.COLLECTION)
-        .putString("action", "find").putObject("matcher", matcher);
+                .putString("collection", PersistorTestParent.COLLECTION)
+                .putString("action", "find").putObject("matcher", matcher);
     }
 
     private JsonObject createSaveQuery(final JsonObject document) {
         return new JsonObject()
-        .putString("collection", PersistorTestParent.COLLECTION)
-        .putString("action", "save").putObject("document", document);
+                .putString("collection", PersistorTestParent.COLLECTION)
+                .putString("action", "save").putObject("document", document);
     }
 
     private void insertTypedData(final Object data) {

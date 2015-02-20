@@ -83,9 +83,9 @@ public class VertxTransportFactoryTest {
 
         expect(mockVertx.createNetClient()).andReturn(mockClient);
         expect(mockClient.setConnectTimeout(config.getConnectTimeout()))
-        .andReturn(mockClient);
+                .andReturn(mockClient);
         expect(mockClient.setTCPKeepAlive(config.isUsingSoKeepalive()))
-        .andReturn(mockClient);
+                .andReturn(mockClient);
         expect(mockClient.setUsePooledBuffers(true)).andReturn(mockClient);
         expect(mockClient.setSSL(true)).andReturn(mockClient);
 
@@ -95,11 +95,11 @@ public class VertxTransportFactoryTest {
                         handler(mockSocket))).andReturn(mockClient);
 
         expect(mockSocket.closeHandler(anyObject(VoidHandler.class)))
-        .andReturn(mockSocket);
+                .andReturn(mockSocket);
         expect(mockSocket.dataHandler(anyObject(Handler.class))).andReturn(
                 mockSocket);
         expect(mockSocket.exceptionHandler(anyObject(Handler.class)))
-        .andReturn(mockSocket);
+                .andReturn(mockSocket);
 
         replay(mockVertx, mockClient, mockSocket, mockListener);
 
@@ -141,9 +141,9 @@ public class VertxTransportFactoryTest {
 
         expect(mockVertx.createNetClient()).andReturn(mockClient);
         expect(mockClient.setConnectTimeout(config.getConnectTimeout()))
-        .andReturn(mockClient);
+                .andReturn(mockClient);
         expect(mockClient.setTCPKeepAlive(config.isUsingSoKeepalive()))
-        .andReturn(mockClient);
+                .andReturn(mockClient);
         expect(mockClient.setUsePooledBuffers(true)).andReturn(mockClient);
         expect(mockClient.setSSL(true)).andReturn(mockClient);
 
@@ -153,11 +153,11 @@ public class VertxTransportFactoryTest {
                         handler(mockSocket))).andReturn(mockClient);
 
         expect(mockSocket.closeHandler(anyObject(VoidHandler.class)))
-        .andReturn(mockSocket);
+                .andReturn(mockSocket);
         expect(mockSocket.dataHandler(anyObject(Handler.class))).andReturn(
                 mockSocket);
         expect(mockSocket.exceptionHandler(anyObject(Handler.class)))
-        .andReturn(mockSocket);
+                .andReturn(mockSocket);
 
         replay(mockVertx, mockClient, mockSocket, mockListener);
 
@@ -196,9 +196,9 @@ public class VertxTransportFactoryTest {
 
         expect(mockVertx.createNetClient()).andReturn(mockClient);
         expect(mockClient.setConnectTimeout(config.getConnectTimeout()))
-        .andReturn(mockClient);
+                .andReturn(mockClient);
         expect(mockClient.setTCPKeepAlive(config.isUsingSoKeepalive()))
-        .andReturn(mockClient);
+                .andReturn(mockClient);
         expect(mockClient.setUsePooledBuffers(true)).andReturn(mockClient);
 
         expect(mockClient.setTCPNoDelay(true)).andReturn(mockClient);
@@ -207,11 +207,11 @@ public class VertxTransportFactoryTest {
                         handler(mockSocket))).andReturn(mockClient);
 
         expect(mockSocket.closeHandler(anyObject(VoidHandler.class)))
-        .andReturn(mockSocket);
+                .andReturn(mockSocket);
         expect(mockSocket.dataHandler(anyObject(Handler.class))).andReturn(
                 mockSocket);
         expect(mockSocket.exceptionHandler(anyObject(Handler.class)))
-        .andReturn(mockSocket);
+                .andReturn(mockSocket);
 
         replay(mockVertx, mockClient, mockSocket, mockListener);
 
@@ -245,7 +245,7 @@ public class VertxTransportFactoryTest {
      * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
      */
     protected final class MockSslEngineSocketFactory extends SocketFactory
-    implements SslEngineFactory {
+            implements SslEngineFactory {
         /**
          * {@inheritDoc}
          */
@@ -261,7 +261,7 @@ public class VertxTransportFactoryTest {
         @Override
         public Socket createSocket(final InetAddress address, final int port,
                 final InetAddress localAddress, final int localPort)
-                throws IOException {
+                        throws IOException {
             return null;
         }
 
@@ -280,7 +280,7 @@ public class VertxTransportFactoryTest {
         @Override
         public Socket createSocket(final String host, final int port,
                 final InetAddress localHost, final int localPort)
-                throws IOException, UnknownHostException {
+                        throws IOException, UnknownHostException {
             return null;
         }
 

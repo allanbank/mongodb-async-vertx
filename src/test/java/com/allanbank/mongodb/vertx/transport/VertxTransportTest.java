@@ -89,7 +89,7 @@ public class VertxTransportTest {
     public void setUp() {
         myConfig = new MongoClientConfiguration();
         myServer = new Cluster(myConfig, ClusterType.STAND_ALONE)
-        .add("localhost:27017");
+                .add("localhost:27017");
     }
 
     /**
@@ -249,7 +249,7 @@ public class VertxTransportTest {
         expect(
                 myMockClient.connect(eq(27017), eq("localhost"),
                         (Handler<AsyncResult<NetSocket>>) anyObject()))
-                        .andReturn(myMockClient);
+                .andReturn(myMockClient);
 
         replay();
 
@@ -288,7 +288,7 @@ public class VertxTransportTest {
         expect(
                 myMockClient.connect(eq(27017), eq("localhost"),
                         (Handler<AsyncResult<NetSocket>>) anyObject()))
-                        .andThrow(toThrow);
+                .andThrow(toThrow);
 
         replay();
 
@@ -474,11 +474,11 @@ public class VertxTransportTest {
                         handler(myMockSocket))).andReturn(myMockClient);
 
         expect(myMockSocket.closeHandler(anyObject(VoidHandler.class)))
-        .andReturn(myMockSocket);
+                .andReturn(myMockSocket);
         expect(myMockSocket.dataHandler(anyObject(Handler.class))).andReturn(
                 myMockSocket);
         expect(myMockSocket.exceptionHandler(anyObject(Handler.class)))
-        .andReturn(myMockSocket);
+                .andReturn(myMockSocket);
     }
 
     /**

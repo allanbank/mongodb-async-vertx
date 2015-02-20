@@ -87,7 +87,7 @@ public class HandlerSupport {
      * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
      */
     /* package */static final class HandlerMatcher<T> implements
-    IArgumentMatcher {
+            IArgumentMatcher {
         /** The error to provide the handler. */
         private final Throwable myError;
 
@@ -139,11 +139,11 @@ public class HandlerSupport {
             if (argument instanceof Handler) {
                 if (myError == null) {
                     ((Handler<AsyncResult<T>>) argument)
-                    .handle(new DefaultFutureResult<>(myResult));
+                            .handle(new DefaultFutureResult<>(myResult));
                 }
                 else {
                     ((Handler<AsyncResult<T>>) argument)
-                    .handle(new DefaultFutureResult<T>(myError));
+                            .handle(new DefaultFutureResult<T>(myError));
                 }
                 return true;
             }
