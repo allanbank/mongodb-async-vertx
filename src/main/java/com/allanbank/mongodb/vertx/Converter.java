@@ -436,8 +436,8 @@ public class Converter {
             // $timestamp : { "t" : <int>, "i" <int> }
             final JsonObject subObject = json.getObject("$timestamp");
             if (TIMESTAMP_SUB_FIELDS.equals(subObject.getFieldNames())) {
-                final long time = subObject.getInteger("t") ;
-                final long incr = subObject.getInteger("i");
+                final long time = subObject.getLong("t");
+                final long incr = subObject.getLong("i");
 
                 return  new MongoTimestampElement(fieldName, (time << Integer.SIZE) | incr);
             }
