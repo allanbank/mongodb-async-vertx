@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -59,7 +59,7 @@ import com.allanbank.mongodb.client.transport.TransportResponseListener;
 /**
  * VertxTransportFactoryTest provides tests for the
  * {@link VertxTransportFactory}.
- * 
+ *
  * @api.no This class is <b>NOT</b> part of the drivers API. This class may be
  *         mutated in incompatible ways between any two releases of the driver.
  * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
@@ -73,19 +73,19 @@ public class VertxTransportFactoryTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreateSslTransport() {
-        MongoClientConfiguration config = new MongoClientConfiguration();
+        final MongoClientConfiguration config = new MongoClientConfiguration();
         config.setSocketFactory(SSLSocketFactory.getDefault());
 
-        Vertx mockVertx = createMock(Vertx.class);
-        NetClient mockClient = createMock(NetClient.class);
-        NetSocket mockSocket = createMock(NetSocket.class);
-        TransportResponseListener mockListener = createMock(TransportResponseListener.class);
+        final Vertx mockVertx = createMock(Vertx.class);
+        final NetClient mockClient = createMock(NetClient.class);
+        final NetSocket mockSocket = createMock(NetSocket.class);
+        final TransportResponseListener mockListener = createMock(TransportResponseListener.class);
 
         expect(mockVertx.createNetClient()).andReturn(mockClient);
         expect(mockClient.setConnectTimeout(config.getConnectTimeout()))
-                .andReturn(mockClient);
+        .andReturn(mockClient);
         expect(mockClient.setTCPKeepAlive(config.isUsingSoKeepalive()))
-                .andReturn(mockClient);
+        .andReturn(mockClient);
         expect(mockClient.setUsePooledBuffers(true)).andReturn(mockClient);
         expect(mockClient.setSSL(true)).andReturn(mockClient);
 
@@ -95,27 +95,28 @@ public class VertxTransportFactoryTest {
                         handler(mockSocket))).andReturn(mockClient);
 
         expect(mockSocket.closeHandler(anyObject(VoidHandler.class)))
-                .andReturn(mockSocket);
+        .andReturn(mockSocket);
         expect(mockSocket.dataHandler(anyObject(Handler.class))).andReturn(
                 mockSocket);
         expect(mockSocket.exceptionHandler(anyObject(Handler.class)))
-                .andReturn(mockSocket);
+        .andReturn(mockSocket);
 
         replay(mockVertx, mockClient, mockSocket, mockListener);
 
-        VertxTransportFactory factory = new VertxTransportFactory(mockVertx);
+        final VertxTransportFactory factory = new VertxTransportFactory(
+                mockVertx);
 
-        StringEncoderCache eCache = new StringEncoderCache();
-        StringDecoderCache dCache = new StringDecoderCache();
-        Cluster cluster = new Cluster(config, ClusterType.STAND_ALONE);
-        Server server = cluster.add("localhost:27017");
+        final StringEncoderCache eCache = new StringEncoderCache();
+        final StringDecoderCache dCache = new StringDecoderCache();
+        final Cluster cluster = new Cluster(config, ClusterType.STAND_ALONE);
+        final Server server = cluster.add("localhost:27017");
 
         try {
-            VertxTransport t = factory.createTransport(server, config, eCache,
-                    dCache, mockListener);
+            final VertxTransport t = factory.createTransport(server, config,
+                    eCache, dCache, mockListener);
             assertThat(t, notNullValue());
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             fail(e.getMessage());
         }
 
@@ -128,21 +129,21 @@ public class VertxTransportFactoryTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreateSslTransportForEngine() {
-        SocketFactory sFactory = new MockSslEngineSocketFactory();
+        final SocketFactory sFactory = new MockSslEngineSocketFactory();
 
-        MongoClientConfiguration config = new MongoClientConfiguration();
+        final MongoClientConfiguration config = new MongoClientConfiguration();
         config.setSocketFactory(sFactory);
 
-        Vertx mockVertx = createMock(Vertx.class);
-        NetClient mockClient = createMock(NetClient.class);
-        NetSocket mockSocket = createMock(NetSocket.class);
-        TransportResponseListener mockListener = createMock(TransportResponseListener.class);
+        final Vertx mockVertx = createMock(Vertx.class);
+        final NetClient mockClient = createMock(NetClient.class);
+        final NetSocket mockSocket = createMock(NetSocket.class);
+        final TransportResponseListener mockListener = createMock(TransportResponseListener.class);
 
         expect(mockVertx.createNetClient()).andReturn(mockClient);
         expect(mockClient.setConnectTimeout(config.getConnectTimeout()))
-                .andReturn(mockClient);
+        .andReturn(mockClient);
         expect(mockClient.setTCPKeepAlive(config.isUsingSoKeepalive()))
-                .andReturn(mockClient);
+        .andReturn(mockClient);
         expect(mockClient.setUsePooledBuffers(true)).andReturn(mockClient);
         expect(mockClient.setSSL(true)).andReturn(mockClient);
 
@@ -152,27 +153,28 @@ public class VertxTransportFactoryTest {
                         handler(mockSocket))).andReturn(mockClient);
 
         expect(mockSocket.closeHandler(anyObject(VoidHandler.class)))
-                .andReturn(mockSocket);
+        .andReturn(mockSocket);
         expect(mockSocket.dataHandler(anyObject(Handler.class))).andReturn(
                 mockSocket);
         expect(mockSocket.exceptionHandler(anyObject(Handler.class)))
-                .andReturn(mockSocket);
+        .andReturn(mockSocket);
 
         replay(mockVertx, mockClient, mockSocket, mockListener);
 
-        VertxTransportFactory factory = new VertxTransportFactory(mockVertx);
+        final VertxTransportFactory factory = new VertxTransportFactory(
+                mockVertx);
 
-        StringEncoderCache eCache = new StringEncoderCache();
-        StringDecoderCache dCache = new StringDecoderCache();
-        Cluster cluster = new Cluster(config, ClusterType.STAND_ALONE);
-        Server server = cluster.add("localhost:27017");
+        final StringEncoderCache eCache = new StringEncoderCache();
+        final StringDecoderCache dCache = new StringDecoderCache();
+        final Cluster cluster = new Cluster(config, ClusterType.STAND_ALONE);
+        final Server server = cluster.add("localhost:27017");
 
         try {
-            VertxTransport t = factory.createTransport(server, config, eCache,
-                    dCache, mockListener);
+            final VertxTransport t = factory.createTransport(server, config,
+                    eCache, dCache, mockListener);
             assertThat(t, notNullValue());
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             fail(e.getMessage());
         }
 
@@ -185,18 +187,18 @@ public class VertxTransportFactoryTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testCreateTransport() {
-        MongoClientConfiguration config = new MongoClientConfiguration();
+        final MongoClientConfiguration config = new MongoClientConfiguration();
 
-        Vertx mockVertx = createMock(Vertx.class);
-        NetClient mockClient = createMock(NetClient.class);
-        NetSocket mockSocket = createMock(NetSocket.class);
-        TransportResponseListener mockListener = createMock(TransportResponseListener.class);
+        final Vertx mockVertx = createMock(Vertx.class);
+        final NetClient mockClient = createMock(NetClient.class);
+        final NetSocket mockSocket = createMock(NetSocket.class);
+        final TransportResponseListener mockListener = createMock(TransportResponseListener.class);
 
         expect(mockVertx.createNetClient()).andReturn(mockClient);
         expect(mockClient.setConnectTimeout(config.getConnectTimeout()))
-                .andReturn(mockClient);
+        .andReturn(mockClient);
         expect(mockClient.setTCPKeepAlive(config.isUsingSoKeepalive()))
-                .andReturn(mockClient);
+        .andReturn(mockClient);
         expect(mockClient.setUsePooledBuffers(true)).andReturn(mockClient);
 
         expect(mockClient.setTCPNoDelay(true)).andReturn(mockClient);
@@ -205,27 +207,28 @@ public class VertxTransportFactoryTest {
                         handler(mockSocket))).andReturn(mockClient);
 
         expect(mockSocket.closeHandler(anyObject(VoidHandler.class)))
-                .andReturn(mockSocket);
+        .andReturn(mockSocket);
         expect(mockSocket.dataHandler(anyObject(Handler.class))).andReturn(
                 mockSocket);
         expect(mockSocket.exceptionHandler(anyObject(Handler.class)))
-                .andReturn(mockSocket);
+        .andReturn(mockSocket);
 
         replay(mockVertx, mockClient, mockSocket, mockListener);
 
-        VertxTransportFactory factory = new VertxTransportFactory(mockVertx);
+        final VertxTransportFactory factory = new VertxTransportFactory(
+                mockVertx);
 
-        StringEncoderCache eCache = new StringEncoderCache();
-        StringDecoderCache dCache = new StringDecoderCache();
-        Cluster cluster = new Cluster(config, ClusterType.STAND_ALONE);
-        Server server = cluster.add("localhost:27017");
+        final StringEncoderCache eCache = new StringEncoderCache();
+        final StringDecoderCache dCache = new StringDecoderCache();
+        final Cluster cluster = new Cluster(config, ClusterType.STAND_ALONE);
+        final Server server = cluster.add("localhost:27017");
 
         try {
-            VertxTransport t = factory.createTransport(server, config, eCache,
-                    dCache, mockListener);
+            final VertxTransport t = factory.createTransport(server, config,
+                    eCache, dCache, mockListener);
             assertThat(t, notNullValue());
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             fail(e.getMessage());
         }
 
@@ -235,19 +238,19 @@ public class VertxTransportFactoryTest {
     /**
      * MockSslEngineSocketFactory provides a fake socket factory that also
      * implements the {@link SslEngineFactory} interface.
-     * 
+     *
      * @api.no This class is <b>NOT</b> part of the drivers API. This class may
      *         be mutated in incompatible ways between any two releases of the
      *         driver.
      * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
      */
     protected final class MockSslEngineSocketFactory extends SocketFactory
-            implements SslEngineFactory {
+    implements SslEngineFactory {
         /**
          * {@inheritDoc}
          */
         @Override
-        public Socket createSocket(InetAddress host, int port)
+        public Socket createSocket(final InetAddress host, final int port)
                 throws IOException {
             return null;
         }
@@ -256,8 +259,9 @@ public class VertxTransportFactoryTest {
          * {@inheritDoc}
          */
         @Override
-        public Socket createSocket(InetAddress address, int port,
-                InetAddress localAddress, int localPort) throws IOException {
+        public Socket createSocket(final InetAddress address, final int port,
+                final InetAddress localAddress, final int localPort)
+                throws IOException {
             return null;
         }
 
@@ -265,8 +269,8 @@ public class VertxTransportFactoryTest {
          * {@inheritDoc}
          */
         @Override
-        public Socket createSocket(String host, int port) throws IOException,
-                UnknownHostException {
+        public Socket createSocket(final String host, final int port)
+                throws IOException, UnknownHostException {
             return null;
         }
 
@@ -274,9 +278,9 @@ public class VertxTransportFactoryTest {
          * {@inheritDoc}
          */
         @Override
-        public Socket createSocket(String host, int port,
-                InetAddress localHost, int localPort) throws IOException,
-                UnknownHostException {
+        public Socket createSocket(final String host, final int port,
+                final InetAddress localHost, final int localPort)
+                throws IOException, UnknownHostException {
             return null;
         }
 

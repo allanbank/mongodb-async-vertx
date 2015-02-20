@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +38,7 @@ import com.allanbank.mongodb.bson.element.ObjectId;
 
 /**
  * ConverterTest provides tests for the {@link Converter} class.
- * 
+ *
  * @api.no This class is <b>NOT</b> part of the drivers API. This class may be
  *         mutated in incompatible ways between any two releases of the driver.
  * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
@@ -53,8 +53,23 @@ public class ConverterTest {
     @Test
     public void testConvert() {
 
-        Document doc = createDoc();
-        JsonObject json = Converter.convert(doc);
+        final Document doc = createDoc();
+        final JsonObject json = Converter.convert(doc);
+
+        assertThat(Converter.convert(json), is(doc));
+    }
+
+    /**
+     * Test method for {@link Converter#convert} and
+     * {@link Converter#convert(JsonObject)}.
+     */
+    @Test
+    public void testConvertArrayBinary() {
+        final DocumentBuilder docBuilder = BuilderFactory.start();
+        docBuilder.pushArray("a").add(new byte[5]);
+
+        final Document doc = docBuilder.build();
+        final JsonObject json = Converter.convert(doc);
 
         assertThat(Converter.convert(json), is(doc));
     }
@@ -66,30 +81,16 @@ public class ConverterTest {
     @Test
     public void testConvertBinary() {
 
-        Document doc = BuilderFactory.start().add("b", new byte[5]).build();
-        JsonObject json = Converter.convert(doc);
-
-        assertThat(Converter.convert(json), is(doc));
-    }
-
-    /**
-     * Test method for {@link Converter#convert} and
-     * {@link Converter#convert(JsonObject)}.
-     */
-    @Test
-    public void testConvertArrayBinary() {
-        DocumentBuilder docBuilder = BuilderFactory.start();
-        docBuilder.pushArray("a").add(new byte[5]);
-
-        Document doc = docBuilder.build();
-        JsonObject json = Converter.convert(doc);
+        final Document doc = BuilderFactory.start().add("b", new byte[5])
+                .build();
+        final JsonObject json = Converter.convert(doc);
 
         assertThat(Converter.convert(json), is(doc));
     }
 
     /**
      * Creates a sample document.
-     * 
+     *
      * @return The document.
      */
     private Document createDoc() {

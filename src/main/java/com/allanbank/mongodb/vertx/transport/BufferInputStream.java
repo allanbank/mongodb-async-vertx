@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,7 +29,7 @@ import org.vertx.java.core.buffer.Buffer;
 /**
  * BufferInputStream provides an {@link InputStream} backed by a series of
  * {@link Buffer Buffers}.
- * 
+ *
  * @api.no This class is <b>NOT</b> part of the drivers API. This class may be
  *         mutated in incompatible ways between any two releases of the driver.
  * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
@@ -50,9 +50,34 @@ import org.vertx.java.core.buffer.Buffer;
      */
     public BufferInputStream() {
         super();
-        myBuffers = new LinkedBlockingQueue<Buffer>();
+        myBuffers = new LinkedBlockingQueue<>();
         myCurrent = null;
         myOffset = 0;
+    }
+
+    /**
+     * Adds the buffer to the input stream.
+     *
+     * @param buffer
+     *            The buffer to add.
+     */
+    public void addBuffer(final Buffer buffer) {
+        myBuffers.add(buffer);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Overridden to return the number of remaining bytes in the buffers.
+     * </p>
+     */
+    @Override
+    public int available() {
+        int available = (myCurrent != null) ? myCurrent.length() - myOffset : 0;
+        for (final Buffer b : myBuffers) {
+            available += b.length();
+        }
+        return available;
     }
 
     /**
@@ -69,31 +94,6 @@ import org.vertx.java.core.buffer.Buffer;
     }
 
     /**
-     * Adds the buffer to the input stream.
-     * 
-     * @param buffer
-     *            The buffer to add.
-     */
-    public void addBuffer(Buffer buffer) {
-        myBuffers.add(buffer);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * Overridden to return the number of remaining bytes in the buffers.
-     * </p>
-     */
-    @Override
-    public int available() {
-        int available = (myCurrent != null) ? myCurrent.length() - myOffset : 0;
-        for (Buffer b : myBuffers) {
-            available += b.length();
-        }
-        return available;
-    }
-
-    /**
      * {@inheritDoc}
      * <p>
      * Overridden to return the next byte from the next buffer.
@@ -106,7 +106,7 @@ import org.vertx.java.core.buffer.Buffer;
             return -1;
         }
 
-        int offset = myOffset;
+        final int offset = myOffset;
         myOffset += 1;
 
         return myCurrent.getByte(offset);
@@ -118,11 +118,12 @@ import org.vertx.java.core.buffer.Buffer;
      * Overridden to do a bulk read into the provided buffer.
      * </p>
      */
-    public int read(byte b[], int off, int len) {
+    @Override
+    public int read(final byte b[], final int off, final int len) {
         if (b == null) {
             throw new NullPointerException();
         }
-        else if (off < 0 || len < 0 || len > b.length - off) {
+        else if ((off < 0) || (len < 0) || (len > (b.length - off))) {
             throw new IndexOutOfBoundsException();
         }
         else if (len == 0) {
@@ -134,7 +135,7 @@ import org.vertx.java.core.buffer.Buffer;
             return -1;
         }
 
-        int read = Math.min(myCurrent.length() - myOffset, len);
+        final int read = Math.min(myCurrent.length() - myOffset, len);
 
         myCurrent.getByteBuf().getBytes(myOffset, b, off, read);
         myOffset += read;

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,21 +46,12 @@ import com.allanbank.mongodb.error.ConnectionLostException;
 /**
  * VertxDataHandler receives each buffer and constructs the received MongoDB
  * {@link Message messages}.
- * 
+ *
  * @api.no This class is <b>NOT</b> part of the drivers API. This class may be
  *         mutated in incompatible ways between any two releases of the driver.
  * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
  */
 /* package */class VertxDataHandler implements Handler<Buffer> {
-
-    /** The listener for the received messages. */
-    private final TransportResponseListener myListener;
-
-    /** The transport for the handler. */
-    private final VertxTransport myTransport;
-
-    /** The current buffers to read. */
-    private final BufferInputStream myInput;
 
     /** The BSON input stream to read messages. */
     private final BsonInputStream myBsonIn;
@@ -68,12 +59,21 @@ import com.allanbank.mongodb.error.ConnectionLostException;
     /** The active header being read. */
     private volatile Header myCurrentHeader;
 
+    /** The current buffers to read. */
+    private final BufferInputStream myInput;
+
+    /** The listener for the received messages. */
+    private final TransportResponseListener myListener;
+
     /** Ensures that only one thread is parsing the buffers at a time. */
     private final Lock myParseLock;
 
+    /** The transport for the handler. */
+    private final VertxTransport myTransport;
+
     /**
      * Creates a new VertxDataHandler.
-     * 
+     *
      * @param transport
      *            The transport for the handler.
      * @param cache
@@ -81,8 +81,9 @@ import com.allanbank.mongodb.error.ConnectionLostException;
      * @param listener
      *            The listener for the received messages.
      */
-    public VertxDataHandler(VertxTransport transport, StringDecoderCache cache,
-            TransportResponseListener listener) {
+    public VertxDataHandler(final VertxTransport transport,
+            final StringDecoderCache cache,
+            final TransportResponseListener listener) {
         myTransport = transport;
         myListener = listener;
         myInput = new BufferInputStream();
@@ -99,7 +100,7 @@ import com.allanbank.mongodb.error.ConnectionLostException;
      * </p>
      */
     @Override
-    public void handle(Buffer event) {
+    public void handle(final Buffer event) {
 
         // addBuffer is thread safe.
         myInput.addBuffer(event);
@@ -110,8 +111,8 @@ import com.allanbank.mongodb.error.ConnectionLostException;
             myParseLock.lock();
             readMessages();
         }
-        catch (IOException ioe) {
-            StreamCorruptedException sce = new StreamCorruptedException(
+        catch (final IOException ioe) {
+            final StreamCorruptedException sce = new StreamCorruptedException(
                     ioe.getMessage());
             sce.initCause(ioe);
             myListener.closed(new ConnectionLostException(sce));
@@ -125,14 +126,14 @@ import com.allanbank.mongodb.error.ConnectionLostException;
 
     /**
      * Reads all of the messages from the read buffers.
-     * 
+     *
      * @throws IOException
      *             On a failure to read the messages.
      */
     protected void readMessages() throws IOException {
         boolean canRead = true;
         while (canRead) {
-            int available = myBsonIn.available();
+            final int available = myBsonIn.available();
             if (myCurrentHeader != null) {
                 if ((myCurrentHeader.getLength() - Header.SIZE) <= available) {
                     readMessage();
@@ -155,7 +156,7 @@ import com.allanbank.mongodb.error.ConnectionLostException;
     /**
      * Reads the message described by the {@link #myCurrentHeader current
      * header}.
-     * 
+     *
      * @throws IOException
      *             On a failure reading the message.
      */

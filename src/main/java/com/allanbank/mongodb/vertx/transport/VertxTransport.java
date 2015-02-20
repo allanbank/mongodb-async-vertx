@@ -95,7 +95,7 @@ import com.allanbank.mongodb.util.log.LogFactory;
         while (addrIter.hasNext() && (socket == null)) {
             final InetSocketAddress address = addrIter.next();
             try {
-                final VertxWaitingHandler<AsyncResult<NetSocket>> handler = new VertxWaitingHandler<AsyncResult<NetSocket>>();
+                final VertxWaitingHandler<AsyncResult<NetSocket>> handler = new VertxWaitingHandler<>();
                 netClient.connect(address.getPort(), address.getHostString(),
                         handler);
                 handler.waitFor();
@@ -190,7 +190,7 @@ import com.allanbank.mongodb.util.log.LogFactory;
      */
     @Override
     public void send(final VertxOutputBuffer buffer) throws IOException,
-            InterruptedIOException {
+    InterruptedIOException {
         myNetSocket.write(buffer.getBuffer());
     }
 
@@ -216,6 +216,6 @@ import com.allanbank.mongodb.util.log.LogFactory;
         final InetSocketAddress local = myNetSocket.localAddress();
 
         return "MongoDB(" + local.getPort() + "-->"
-                + myNetSocket.remoteAddress() + ")";
+        + myNetSocket.remoteAddress() + ")";
     }
 }

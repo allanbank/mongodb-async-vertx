@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,7 @@ import com.allanbank.mongodb.client.transport.TransportResponseListener;
 /**
  * VertxExceptionHandlerTest provides tests for the
  * {@link VertxExceptionHandler} class.
- * 
+ *
  * @api.no This class is <b>NOT</b> part of the drivers API. This class may be
  *         mutated in incompatible ways between any two releases of the driver.
  * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
@@ -51,10 +51,10 @@ public class VertxExceptionHandlerTest {
      */
     @Test
     public void testHandle() {
-        VertxTransport mockTransport = createMock(VertxTransport.class);
-        TransportResponseListener mockListener = createMock(TransportResponseListener.class);
+        final VertxTransport mockTransport = createMock(VertxTransport.class);
+        final TransportResponseListener mockListener = createMock(TransportResponseListener.class);
 
-        Capture<MongoDbException> capture = new Capture<MongoDbException>();
+        final Capture<MongoDbException> capture = new Capture<>();
         mockListener.closed(capture(capture));
         expectLastCall();
 
@@ -63,7 +63,7 @@ public class VertxExceptionHandlerTest {
 
         replay(mockTransport, mockListener);
 
-        VertxExceptionHandler handler = new VertxExceptionHandler(
+        final VertxExceptionHandler handler = new VertxExceptionHandler(
                 mockTransport, mockListener);
         handler.handle(null);
 

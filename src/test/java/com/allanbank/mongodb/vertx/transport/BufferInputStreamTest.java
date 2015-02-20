@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,7 +29,7 @@ import org.vertx.java.core.buffer.Buffer;
 
 /**
  * BufferInputStreamTest provides tests for the {@link BufferInputStream} class.
- * 
+ *
  * @api.no This class is <b>NOT</b> part of the drivers API. This class may be
  *         mutated in incompatible ways between any two releases of the driver.
  * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
@@ -42,7 +42,7 @@ public class BufferInputStreamTest {
      */
     @Test
     public void testRead() {
-        BufferInputStream in = new BufferInputStream();
+        final BufferInputStream in = new BufferInputStream();
 
         assertThat(in.read(), is(-1));
 
@@ -72,7 +72,7 @@ public class BufferInputStreamTest {
      */
     @Test
     public void testReadByteArrayIntInt() {
-        BufferInputStream in = new BufferInputStream();
+        final BufferInputStream in = new BufferInputStream();
 
         in.addBuffer(new Buffer(new byte[] { 0, 1, 2, 3, 4 }));
         in.addBuffer(new Buffer(new byte[] { 5, 6, 7 }));
@@ -80,7 +80,7 @@ public class BufferInputStreamTest {
         in.addBuffer(new Buffer(new byte[] { 8, 9 }));
         in.addBuffer(new Buffer(new byte[] { 10 }));
 
-        byte[] buffer = new byte[100];
+        final byte[] buffer = new byte[100];
 
         int read = in.read(buffer, 25, 11);
         assertThat(read, is(5));

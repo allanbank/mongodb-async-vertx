@@ -1,4 +1,5 @@
 package org.vertx.mods.mongo.test.integration.java;
+
 /*
  * Copyright 2013 Red Hat, Inc.
  *
@@ -27,50 +28,54 @@ import org.vertx.testtools.TestVerticle;
 
 public abstract class PersistorTestParent extends TestVerticle {
 
-  public static final String ADDRESS = "test.persistor";
-  public static final String COLLECTION = "testcoll";
-  protected EventBus eb;
+    public static final String ADDRESS = "test.persistor";
+    public static final String COLLECTION = "testcoll";
+    protected EventBus eb;
 
-  @Override
-  public void start() {
-    eb = vertx.eventBus();
-    JsonObject config = getConfig();
-    container.deployModule(System.getProperty("vertx.modulename"), config, 1, new AsyncResultHandler<String>() {
-      public void handle(AsyncResult<String> result) {
-        if (result.succeeded()) {
-          PersistorTestParent.super.start();
-        } else {
-          result.cause().printStackTrace();
-        }
-      }
-    });
-  }
-
-  protected JsonObject getConfig() {
-    JsonObject config = new JsonObject();
-    config.putString("address", ADDRESS);
-    config.putString("db_name", System.getProperty("vertx.mongo.database", "test_db"));
-    config.putString("host", System.getProperty("vertx.mongo.host", "localhost"));
-    config.putNumber("port", Integer.valueOf(System.getProperty("vertx.mongo.port", "27017")));
-    config.putBoolean("use_mongo_types", true);
-    String username = System.getProperty("vertx.mongo.username");
-    String password = System.getProperty("vertx.mongo.password");
-    if (username != null) {
-      config.putString("username", username);
-      config.putString("password", password);
+    @Override
+    public void start() {
+        eb = vertx.eventBus();
+        final JsonObject config = getConfig();
+        container.deployModule(System.getProperty("vertx.modulename"), config,
+                1, new AsyncResultHandler<String>() {
+                    @Override
+                    public void handle(final AsyncResult<String> result) {
+                        if (result.succeeded()) {
+                            PersistorTestParent.super.start();
+                        }
+                        else {
+                            result.cause().printStackTrace();
+                        }
+                    }
+                });
     }
-    config.putBoolean("fake", false);
-    return config;
-  }
 
-  protected void deleteAll(Handler<Message<JsonObject>> handler) {
-    JsonObject matcher = new JsonObject("{}");
-    JsonObject query = new JsonObject()
-            .putString("collection", COLLECTION)
-            .putString("action", "delete")
-            .putObject("matcher", matcher);
+    protected void deleteAll(final Handler<Message<JsonObject>> handler) {
+        final JsonObject matcher = new JsonObject("{}");
+        final JsonObject query = new JsonObject()
+                .putString("collection", COLLECTION)
+                .putString("action", "delete").putObject("matcher", matcher);
 
-    eb.send(ADDRESS, query, handler);
-  }
+        eb.send(ADDRESS, query, handler);
+    }
+
+    protected JsonObject getConfig() {
+        final JsonObject config = new JsonObject();
+        config.putString("address", ADDRESS);
+        config.putString("db_name",
+                System.getProperty("vertx.mongo.database", "test_db"));
+        config.putString("host",
+                System.getProperty("vertx.mongo.host", "localhost"));
+        config.putNumber("port", Integer.valueOf(System.getProperty(
+                "vertx.mongo.port", "27017")));
+        config.putBoolean("use_mongo_types", true);
+        final String username = System.getProperty("vertx.mongo.username");
+        final String password = System.getProperty("vertx.mongo.password");
+        if (username != null) {
+            config.putString("username", username);
+            config.putString("password", password);
+        }
+        config.putBoolean("fake", false);
+        return config;
+    }
 }
-

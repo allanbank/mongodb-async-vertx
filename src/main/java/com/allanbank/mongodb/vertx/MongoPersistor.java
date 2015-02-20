@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -70,13 +70,13 @@ import com.allanbank.mongodb.vertx.transport.VertxTransportFactory;
 
 /**
  * MongoPersistor provides the interface to MongoDB via the Vert.x Bus.
- * 
+ *
  * @api.no This class is <b>NOT</b> part of the drivers API. This class may be
  *         mutated in incompatible ways between any two releases of the driver.
  * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
  */
 public class MongoPersistor extends BusModBase implements
-        Handler<Message<JsonObject>> {
+Handler<Message<JsonObject>> {
 
     /** The log for the persistor. */
     protected static final Log LOG = LogFactory.getLog(MongoPersistor.class);
@@ -124,8 +124,8 @@ public class MongoPersistor extends BusModBase implements
      * </p>
      */
     @Override
-    public void handle(Message<JsonObject> message) {
-        String action = message.body().getString("action");
+    public void handle(final Message<JsonObject> message) {
+        final String action = message.body().getString("action");
         LOG.debug("{}: Received {} request.", message.hashCode(), action);
         if (action == null) {
             sendError(message, "action must be specified");
@@ -183,7 +183,7 @@ public class MongoPersistor extends BusModBase implements
                 sendError(message, "Invalid action: " + action);
             }
         }
-        catch (MongoDbException e) {
+        catch (final MongoDbException e) {
             sendError(message, e.getMessage(), e);
         }
     }
@@ -206,19 +206,19 @@ public class MongoPersistor extends BusModBase implements
         myUsername = getOptionalStringConfig("username", null);
         myPassword = getOptionalStringConfig("password", null);
 
-        ReadPreferenceEditor editor = new ReadPreferenceEditor();
+        final ReadPreferenceEditor editor = new ReadPreferenceEditor();
         editor.setAsText(getOptionalStringConfig("read_preference", "primary"));
         myReadPreference = (ReadPreference) editor.getValue();
 
-        int poolSize = getOptionalIntConfig("pool_size", 10);
+        final int poolSize = getOptionalIntConfig("pool_size", 10);
         mySocketTimeout = getOptionalIntConfig("socket_timeout", 60000);
         myUseTls = getOptionalBooleanConfig("use_ssl", false);
 
-        JsonArray seedsProperty = config.getArray("seeds");
+        final JsonArray seedsProperty = config.getArray("seeds");
 
-        MongoClientConfiguration mongodbConfig = new MongoClientConfiguration();
+        final MongoClientConfiguration mongodbConfig = new MongoClientConfiguration();
         mongodbConfig
-                .setTransportFactory(new VertxTransportFactory(getVertx()));
+        .setTransportFactory(new VertxTransportFactory(getVertx()));
         mongodbConfig.setMaxConnectionCount(poolSize);
         mongodbConfig.setReadTimeout(mySocketTimeout);
         mongodbConfig.setConnectTimeout(mySocketTimeout);
@@ -237,15 +237,15 @@ public class MongoPersistor extends BusModBase implements
 
         myMongoClient = MongoFactory.createClient(mongodbConfig);
         myDatabase = myMongoClient.getDatabase(myDatabaseName);
-        if (myUsername != null && myPassword != null) {
+        if ((myUsername != null) && (myPassword != null)) {
             mongodbConfig.addCredential(Credential.builder()
                     .userName(myUsername).password(myPassword.toCharArray()));
         }
 
-        String durabilityString = getOptionalStringConfig("writeConcern",
+        final String durabilityString = getOptionalStringConfig("writeConcern",
                 getOptionalStringConfig("write_concern", ""));
         if (!durabilityString.isEmpty()) {
-            DurabilityEditor durabilityEditor = new DurabilityEditor();
+            final DurabilityEditor durabilityEditor = new DurabilityEditor();
             durabilityEditor.setAsText(durabilityString);
             myDurability = (Durability) durabilityEditor.getValue();
         }
@@ -276,28 +276,28 @@ public class MongoPersistor extends BusModBase implements
 
     /**
      * Performs a {@link MongoCollection#stream(StreamCallback, Aggregate)}.
-     * 
+     *
      * @param message
      *            The message with the details of the find.
      */
-    protected void doAggregation(Message<JsonObject> message) {
-        String collection = getMandatoryString("collection", message);
+    protected void doAggregation(final Message<JsonObject> message) {
+        final String collection = getMandatoryString("collection", message);
         if (collection == null) {
             sendError(message, "'collection' is missing for 'aggregation'.");
             return;
         }
-        MongoCollection coll = myDatabase.getCollection(collection);
+        final MongoCollection coll = myDatabase.getCollection(collection);
 
-        JsonArray pipelines = message.body().getArray("pipelines");
+        final JsonArray pipelines = message.body().getArray("pipelines");
         if (isPipelinesMissing(pipelines)) {
             sendError(message, "'pipelines' is missing for 'aggregation'.");
             return;
         }
 
-        Aggregate.Builder aggregate = Aggregate.builder();
+        final Aggregate.Builder aggregate = Aggregate.builder();
         // aggregate.useCursor();
         for (int i = 0; i < pipelines.size(); ++i) {
-            JsonObject stage = pipelines.get(i);
+            final JsonObject stage = pipelines.get(i);
 
             aggregate.step(convert(stage));
         }
@@ -318,20 +318,21 @@ public class MongoPersistor extends BusModBase implements
             timeoutMS = 10000; // 10 seconds but only for the vertx messages.
         }
 
-        SimpleBatchingCallback callback = new SimpleBatchingCallback(message,
-                batchSize, timeoutMS);
-        MongoStreamCursorControl control = coll.stream(callback, aggregate);
+        final SimpleBatchingCallback callback = new SimpleBatchingCallback(
+                message, batchSize, timeoutMS);
+        final MongoStreamCursorControl control = coll.stream(callback,
+                aggregate);
         callback.setCursor(control);
     }
 
     /**
      * Performs the {@code collection_stats} action.
-     * 
+     *
      * @param message
      *            The original message.
      */
-    protected void doCollectionStats(Message<JsonObject> message) {
-        String collection = getMandatoryString("collection", message);
+    protected void doCollectionStats(final Message<JsonObject> message) {
+        final String collection = getMandatoryString("collection", message);
         if (collection == null) {
             sendError(message,
                     "'collection' is missing for 'collection_stats'.");
@@ -339,7 +340,7 @@ public class MongoPersistor extends BusModBase implements
         }
 
         // There is no async version of #stats() so run the command instead.
-        Document statsCommand = d(e("collStats", collection)).build();
+        final Document statsCommand = d(e("collStats", collection)).build();
         myDatabase.runCommandAsync(new DocumentCallback("stats", message),
                 statsCommand);
     }
@@ -348,19 +349,19 @@ public class MongoPersistor extends BusModBase implements
      * Performs a
      * {@link MongoCollection#countAsync(Callback, com.allanbank.mongodb.bson.DocumentAssignable)}
      * .
-     * 
+     *
      * @param message
      *            The message with the details of the find.
      */
-    protected void doCount(Message<JsonObject> message) {
-        String collection = getMandatoryString("collection", message);
+    protected void doCount(final Message<JsonObject> message) {
+        final String collection = getMandatoryString("collection", message);
         if (collection == null) {
             sendError(message, "'collection' is missing for 'count'.");
             return;
         }
-        MongoCollection coll = myDatabase.getCollection(collection);
+        final MongoCollection coll = myDatabase.getCollection(collection);
 
-        JsonObject matcher = message.body().getObject("matcher");
+        final JsonObject matcher = message.body().getObject("matcher");
         if (matcher != null) {
             coll.countAsync(new ResultCallback<Long>("count", message));
         }
@@ -374,19 +375,19 @@ public class MongoPersistor extends BusModBase implements
      * Performs a
      * {@link MongoCollection#deleteAsync(Callback, com.allanbank.mongodb.bson.DocumentAssignable, boolean, Durability)}
      * .
-     * 
+     *
      * @param message
      *            The message with the details of the find.
      */
-    protected void doDelete(Message<JsonObject> message) {
-        String collection = getMandatoryString("collection", message);
+    protected void doDelete(final Message<JsonObject> message) {
+        final String collection = getMandatoryString("collection", message);
         if (collection == null) {
             sendError(message, "'collection' is missing for 'delete'.");
             return;
         }
-        MongoCollection coll = myDatabase.getCollection(collection);
+        final MongoCollection coll = myDatabase.getCollection(collection);
 
-        JsonObject matcher = getMandatoryObject("matcher", message);
+        final JsonObject matcher = getMandatoryObject("matcher", message);
         if (matcher == null) {
             sendError(message, "'matcher' is missing for 'delete'.");
             return;
@@ -398,39 +399,39 @@ public class MongoPersistor extends BusModBase implements
 
     /**
      * Performs the {@code drop_collection} action.
-     * 
+     *
      * @param message
      *            The original message.
      */
-    protected void doDropCollection(Message<JsonObject> message) {
-        String collection = getMandatoryString("collection", message);
+    protected void doDropCollection(final Message<JsonObject> message) {
+        final String collection = getMandatoryString("collection", message);
         if (collection == null) {
             sendError(message, "'collection' is missing for 'drop_collection'.");
             return;
         }
 
         // No async version of #drop() so manually run the command.
-        Document dropCommand = d(e("drop", collection)).build();
+        final Document dropCommand = d(e("drop", collection)).build();
         myDatabase.runCommandAsync(new DocumentCallback(message), dropCommand);
     }
 
     /**
      * Performs a {@link MongoCollection#findAsync(Callback, Find)}.
-     * 
+     *
      * @param message
      *            The message with the details of the find.
      */
-    protected void doFind(Message<JsonObject> message) {
-        String collection = getMandatoryString("collection", message);
+    protected void doFind(final Message<JsonObject> message) {
+        final String collection = getMandatoryString("collection", message);
         if (collection == null) {
             sendError(message, "'collection' is missing for 'find'.");
             return;
         }
-        MongoCollection coll = myDatabase.getCollection(collection);
+        final MongoCollection coll = myDatabase.getCollection(collection);
 
-        Find.Builder find = Find.builder();
+        final Find.Builder find = Find.builder();
 
-        JsonObject matcher = message.body().getObject("matcher");
+        final JsonObject matcher = message.body().getObject("matcher");
         if (matcher != null) {
             find.query(convert(matcher));
         }
@@ -438,17 +439,17 @@ public class MongoPersistor extends BusModBase implements
             find.query(Find.ALL);
         }
 
-        JsonObject keys = message.body().getObject("keys");
+        final JsonObject keys = message.body().getObject("keys");
         if (keys != null) {
             find.projection(convert(keys));
         }
 
-        Integer limit = (Integer) message.body().getNumber("limit");
+        final Integer limit = (Integer) message.body().getNumber("limit");
         if (limit != null) {
             find.limit(limit);
         }
 
-        Integer skip = (Integer) message.body().getNumber("skip");
+        final Integer skip = (Integer) message.body().getNumber("skip");
         if (skip != null) {
             find.skip(skip);
         }
@@ -469,7 +470,7 @@ public class MongoPersistor extends BusModBase implements
             timeout = 10000; // 10 seconds but only for the vertx messages.
         }
 
-        Object hint = message.body().getField("hint");
+        final Object hint = message.body().getField("hint");
         if (hint != null) {
             if (hint instanceof JsonObject) {
                 find.hint(convert((JsonObject) hint));
@@ -483,53 +484,53 @@ public class MongoPersistor extends BusModBase implements
             }
         }
 
-        Object sort = message.body().getField("sort");
+        final Object sort = message.body().getField("sort");
         if (sort != null) {
             find.sort(convertSort(sort));
         }
 
-        SimpleBatchingCallback callback = new SimpleBatchingCallback(message,
-                batchSize, timeout);
+        final SimpleBatchingCallback callback = new SimpleBatchingCallback(
+                message, batchSize, timeout);
 
-        MongoStreamCursorControl cursor = coll.stream(callback, find);
+        final MongoStreamCursorControl cursor = coll.stream(callback, find);
         callback.setCursor(cursor);
     }
 
     /**
      * Performs a
      * {@link MongoCollection#findAndModifyAsync(Callback, FindAndModify)}.
-     * 
+     *
      * @param message
      *            The message with the details of the find.
      */
-    protected void doFindAndModify(Message<JsonObject> message) {
+    protected void doFindAndModify(final Message<JsonObject> message) {
         final JsonObject msgBody = message.body();
 
-        String collection = getMandatoryString("collection", message);
+        final String collection = getMandatoryString("collection", message);
         if (collection == null) {
             sendError(message, "'collection' is missing for 'find_and_modify'.");
             return;
         }
-        MongoCollection coll = myDatabase.getCollection(collection);
+        final MongoCollection coll = myDatabase.getCollection(collection);
 
-        FindAndModify.Builder findAndModify = FindAndModify.builder();
+        final FindAndModify.Builder findAndModify = FindAndModify.builder();
 
-        Document query = convertNullSafe(msgBody.getObject("matcher"));
+        final Document query = convertNullSafe(msgBody.getObject("matcher"));
         if (query != null) {
             findAndModify.query(query);
         }
 
-        Document update = convertNullSafe(msgBody.getObject("update"));
+        final Document update = convertNullSafe(msgBody.getObject("update"));
         if (update != null) {
             findAndModify.update(update);
         }
 
-        Document sort = convertNullSafe(msgBody.getObject("sort"));
+        final Document sort = convertNullSafe(msgBody.getObject("sort"));
         if (sort != null) {
             findAndModify.sort(sort);
         }
 
-        Document fields = convertNullSafe(msgBody.getObject("fields"));
+        final Document fields = convertNullSafe(msgBody.getObject("fields"));
         if (fields != null) {
             findAndModify.fields(fields);
         }
@@ -543,24 +544,24 @@ public class MongoPersistor extends BusModBase implements
 
     /**
      * Performs a {@link MongoCollection#findOneAsync(Callback, Find)}.
-     * 
+     *
      * @param message
      *            The message with the details of the findOne.
      */
-    protected void doFindOne(Message<JsonObject> message) {
-        String collection = getMandatoryString("collection", message);
+    protected void doFindOne(final Message<JsonObject> message) {
+        final String collection = getMandatoryString("collection", message);
         if (collection == null) {
             sendError(message, "'collection' is missing for 'findone'.");
             return;
         }
-        MongoCollection coll = myDatabase.getCollection(collection);
+        final MongoCollection coll = myDatabase.getCollection(collection);
 
-        Find.Builder find = Find.builder();
+        final Find.Builder find = Find.builder();
 
-        JsonObject matcher = message.body().getObject("matcher");
+        final JsonObject matcher = message.body().getObject("matcher");
         find.query((matcher != null) ? convert(matcher) : Find.ALL);
 
-        JsonObject keys = message.body().getObject("keys");
+        final JsonObject keys = message.body().getObject("keys");
         if (keys != null) {
             find.projection(convert(keys));
         }
@@ -570,7 +571,7 @@ public class MongoPersistor extends BusModBase implements
 
     /**
      * Performs the {@code get_collections} action.
-     * 
+     *
      * @param message
      *            The original message.
      */
@@ -581,13 +582,13 @@ public class MongoPersistor extends BusModBase implements
 
     /**
      * Performs the {@code command} action.
-     * 
+     *
      * @param message
      *            The original message.
      */
-    protected void doRunCommand(Message<JsonObject> message) {
+    protected void doRunCommand(final Message<JsonObject> message) {
 
-        Object command = message.body().getField("command");
+        final Object command = message.body().getField("command");
         if (command == null) {
             sendError(message, "'command' is missing for 'run_command'.");
             return;
@@ -611,19 +612,19 @@ public class MongoPersistor extends BusModBase implements
 
     /**
      * Performs the {@code save} action.
-     * 
+     *
      * @param message
      *            The original message.
      */
     protected void doSave(final Message<JsonObject> message) {
-        String collection = getMandatoryString("collection", message);
+        final String collection = getMandatoryString("collection", message);
         if (collection == null) {
             sendError(message, "'collection' is missing for 'save'.");
             return;
         }
-        MongoCollection coll = myDatabase.getCollection(collection);
+        final MongoCollection coll = myDatabase.getCollection(collection);
 
-        JsonObject doc = getMandatoryObject("document", message);
+        final JsonObject doc = getMandatoryObject("document", message);
         if (doc == null) {
             sendError(message, "'document' is missing for 'save'.");
             return;
@@ -631,7 +632,7 @@ public class MongoPersistor extends BusModBase implements
 
         final JsonObject reply;
         if (doc.getField("_id") == null) {
-            String genID = UUID.randomUUID().toString();
+            final String genID = UUID.randomUUID().toString();
 
             doc.putString("_id", genID);
 
@@ -648,33 +649,33 @@ public class MongoPersistor extends BusModBase implements
 
     /**
      * Performs the {@code update} action.
-     * 
+     *
      * @param message
      *            The original message.
      */
-    protected void doUpdate(Message<JsonObject> message) {
-        String collection = getMandatoryString("collection", message);
+    protected void doUpdate(final Message<JsonObject> message) {
+        final String collection = getMandatoryString("collection", message);
         if (collection == null) {
             sendError(message, "'collection' is missing for 'update'.");
             return;
         }
-        MongoCollection coll = myDatabase.getCollection(collection);
+        final MongoCollection coll = myDatabase.getCollection(collection);
 
-        JsonObject criteriaJson = getMandatoryObject("criteria", message);
+        final JsonObject criteriaJson = getMandatoryObject("criteria", message);
         if (criteriaJson == null) {
             sendError(message, "'criteria' is missing for 'update'.");
             return;
         }
-        Document criteria = convert(criteriaJson);
+        final Document criteria = convert(criteriaJson);
 
-        JsonObject objNewJson = getMandatoryObject("objNew", message);
+        final JsonObject objNewJson = getMandatoryObject("objNew", message);
         if (objNewJson == null) {
             return;
         }
-        Document objNew = convert(objNewJson);
+        final Document objNew = convert(objNewJson);
 
-        Boolean upsert = message.body().getBoolean("upsert", false);
-        Boolean multi = message.body().getBoolean("multi", false);
+        final Boolean upsert = message.body().getBoolean("upsert", false);
+        final Boolean multi = message.body().getBoolean("multi", false);
 
         coll.updateAsync(new ResultCallback<Long>(message), criteria, objNew,
                 multi, upsert, myDurability);
@@ -682,13 +683,14 @@ public class MongoPersistor extends BusModBase implements
 
     /**
      * Replies with an error.
-     * 
+     *
      * @param message
      *            The original message.
      * @param thrown
      *            The exception causing the error.
      */
-    protected void sendError(Message<JsonObject> message, Throwable thrown) {
+    protected void sendError(final Message<JsonObject> message,
+            final Throwable thrown) {
         LOG.debug("{}: Sending error reply.", message.hashCode());
 
         if (thrown instanceof Exception) {
@@ -701,14 +703,15 @@ public class MongoPersistor extends BusModBase implements
 
     /**
      * Replies with an optional reply.
-     * 
+     *
      * @param message
      *            The original message.
      * @param reply
      *            The optional reply.
      */
     @Override
-    protected void sendOK(Message<JsonObject> message, JsonObject reply) {
+    protected void sendOK(final Message<JsonObject> message,
+            final JsonObject reply) {
         LOG.debug("{}: Sending OK reply.", message.hashCode());
         if (reply != null) {
             super.sendOK(message, reply);
@@ -720,13 +723,13 @@ public class MongoPersistor extends BusModBase implements
 
     /**
      * Converts the JsonObject to a Document while checking for null values.
-     * 
+     *
      * @param object
      *            The {@link JsonObject}. May be <code>null</code>.
      * @return If {@code object} is not null then the converted document. If
      *         {@code object} is null then null.
      */
-    private Document convertNullSafe(JsonObject object) {
+    private Document convertNullSafe(final JsonObject object) {
         if (object != null) {
             return convert(object);
         }
@@ -735,28 +738,28 @@ public class MongoPersistor extends BusModBase implements
 
     /**
      * Converts the sort specification object or array into a sort document.
-     * 
+     *
      * @param sortObj
      *            The sort specification.
      * @return The sort document.
      */
-    private Document convertSort(Object sortObj) {
+    private Document convertSort(final Object sortObj) {
         if (sortObj instanceof JsonObject) {
             // Backwards compatability and a simpler syntax for single-property
             // sorting
             return convert((JsonObject) sortObj);
         }
         else if (sortObj instanceof JsonArray) {
-            JsonArray sortJsonObjects = (JsonArray) sortObj;
+            final JsonArray sortJsonObjects = (JsonArray) sortObj;
 
-            DocumentBuilder docBuilder = BuilderFactory.start();
-            for (Object curSortObj : sortJsonObjects) {
+            final DocumentBuilder docBuilder = BuilderFactory.start();
+            for (final Object curSortObj : sortJsonObjects) {
                 if (!(curSortObj instanceof JsonObject)) {
                     throw new IllegalArgumentException("Cannot handle type "
                             + curSortObj.getClass().getSimpleName());
                 }
 
-                for (Element element : convert((JsonObject) curSortObj)) {
+                for (final Element element : convert((JsonObject) curSortObj)) {
                     docBuilder.add(element);
                 }
             }
@@ -771,82 +774,161 @@ public class MongoPersistor extends BusModBase implements
 
     /**
      * Makes sure that the pipeline has at least one element.
-     * 
+     *
      * @param pipelines
      *            The pipeline elements.
      * @return True if the pipeline has at least one element.
      */
-    private boolean isPipelinesMissing(JsonArray pipelines) {
-        return pipelines == null || pipelines.size() == 0;
+    private boolean isPipelinesMissing(final JsonArray pipelines) {
+        return (pipelines == null) || (pipelines.size() == 0);
     }
 
     /**
      * Populates the configuration with the seed servers.
-     * 
+     *
      * @param seedsProperty
      *            The {@link JsonArray} with the seed addresses.
      * @param mongodbConfig
      *            The configuration to populate.
      */
-    private void makeSeeds(JsonArray seedsProperty,
-            MongoClientConfiguration mongodbConfig) {
-        for (Object elem : seedsProperty) {
-            JsonObject address = (JsonObject) elem;
-            String host = address.getString("host");
-            int port = address.getInteger("port");
+    private void makeSeeds(final JsonArray seedsProperty,
+            final MongoClientConfiguration mongodbConfig) {
+        for (final Object elem : seedsProperty) {
+            final JsonObject address = (JsonObject) elem;
+            final String host = address.getString("host");
+            final int port = address.getInteger("port");
             mongodbConfig.addServer(new InetSocketAddress(host, port));
+        }
+    }
+
+    /**
+     * DocumentCallback provides the callback for actions returning a single
+     * document.
+     *
+     * @api.no This class is <b>NOT</b> part of the drivers API. This class may
+     *         be mutated in incompatible ways between any two releases of the
+     *         driver.
+     * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
+     */
+    protected final class DocumentCallback implements Callback<Document> {
+
+        /** The name of the reply field. */
+        private final String myFieldName;
+
+        /** The original message. */
+        private final Message<JsonObject> myMessage;
+
+        /** The reply to the request. */
+        private final JsonObject myReply;
+
+        /**
+         * Creates a new DocumentCallback.
+         *
+         * @param reply
+         *            The reply to the request.
+         * @param message
+         *            The original message.
+         */
+        public DocumentCallback(final JsonObject reply,
+                final Message<JsonObject> message) {
+            myReply = reply;
+            myMessage = message;
+            myFieldName = "result";
+        }
+
+        /**
+         * Creates a new DocumentCallback.
+         *
+         * @param message
+         *            The original message.
+         */
+        public DocumentCallback(final Message<JsonObject> message) {
+            this((JsonObject) null, message);
+        }
+
+        /**
+         * Creates a new DocumentCallback.
+         *
+         * @param fieldName
+         *            The name of the field in the reply.
+         * @param message
+         *            The original message.
+         */
+        public DocumentCallback(final String fieldName,
+                final Message<JsonObject> message) {
+            myReply = null;
+            myMessage = message;
+            myFieldName = fieldName;
+        }
+
+        /**
+         * {@inheritDoc}
+         * <p>
+         * Overridden to reply based on the results.
+         * </p>
+         */
+        @Override
+        public void callback(final Document result) {
+            final JsonObject reply = (myReply != null) ? myReply.copy()
+                    : new JsonObject();
+            if (result != null) {
+                reply.putObject(myFieldName, convert(result));
+            }
+            // else leave the field blank so it is 'undefined'.
+
+            sendOK(myMessage, reply);
+        }
+
+        /**
+         * {@inheritDoc}
+         * <p>
+         * Overridden to reply that there was an error.
+         * </p>
+         */
+        @Override
+        public void exception(final Throwable thrown) {
+            sendError(myMessage, thrown);
         }
     }
 
     /**
      * ListCollectionNamesCallback provides the logic to handle the stream of
      * documents returned for the collection names.
-     * 
+     *
      * @api.no This class is <b>NOT</b> part of the drivers API. This class may
      *         be mutated in incompatible ways between any two releases of the
      *         driver.
      * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
      */
     protected final class ListCollectionNamesCallback implements
-            StreamCallback<Document> {
+    StreamCallback<Document> {
 
         /** The request message. */
         private final Message<JsonObject> myMessage;
 
         /** The collected names. */
-        private final List<String> myNames = new ArrayList<String>();
+        private final List<String> myNames = new ArrayList<>();
 
         /**
          * Creates a new ListCollectionNamesCallback.
-         * 
+         *
          * @param message
          *            The request message.
          */
-        public ListCollectionNamesCallback(Message<JsonObject> message) {
+        public ListCollectionNamesCallback(final Message<JsonObject> message) {
             myMessage = message;
         }
 
         /**
          * Callback for a single collection document. Extracts the name of the
          * collection for later use.
-         * 
+         *
          * @param result
          *            The collection document.
          */
         @Override
-        public void callback(Document result) {
+        public void callback(final Document result) {
             myNames.add(result.findFirst("name").getValueAsString());
-        }
-
-        /**
-         * We report the error to the caller.
-         * 
-         * @param thrown
-         *            The error encountered.
-         */
-        @Override
-        public void exception(Throwable thrown) {
-            sendError(myMessage, thrown);
         }
 
         /**
@@ -855,24 +937,125 @@ public class MongoPersistor extends BusModBase implements
          */
         @Override
         public void done() {
-            JsonObject reply = new JsonObject();
+            final JsonObject reply = new JsonObject();
             reply.putArray("collections", new JsonArray(myDatabase
                     .listCollectionNames().toArray()));
             sendOK(myMessage, reply);
+        }
+
+        /**
+         * We report the error to the caller.
+         *
+         * @param thrown
+         *            The error encountered.
+         */
+        @Override
+        public void exception(final Throwable thrown) {
+            sendError(myMessage, thrown);
+        }
+    }
+
+    /**
+     * ResultCallback provides the callback for most actions.
+     *
+     * @param <T>
+     *            The expected response type.
+     *
+     * @api.no This class is <b>NOT</b> part of the drivers API. This class may
+     *         be mutated in incompatible ways between any two releases of the
+     *         driver.
+     * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
+     */
+    protected final class ResultCallback<T extends Number> implements
+    Callback<T> {
+
+        /** The name of the reply value field. */
+        private final String myFieldName;
+
+        /** The original message. */
+        private final Message<JsonObject> myMessage;
+
+        /** The reply to the request. */
+        private final JsonObject myReply;
+
+        /**
+         * Creates a new ResultCallback.
+         *
+         * @param reply
+         *            The reply to the request.
+         * @param message
+         *            The original message.
+         */
+        public ResultCallback(final JsonObject reply,
+                final Message<JsonObject> message) {
+            myFieldName = "number";
+            myReply = reply;
+            myMessage = message;
+        }
+
+        /**
+         * Creates a new ResultCallback.
+         *
+         * @param message
+         *            The original message.
+         */
+        public ResultCallback(final Message<JsonObject> message) {
+            this((JsonObject) null, message);
+        }
+
+        /**
+         * Creates a new ResultCallback.
+         *
+         * @param fieldName
+         *            The field name for the value.
+         * @param message
+         *            The original message.
+         */
+        public ResultCallback(final String fieldName,
+                final Message<JsonObject> message) {
+            myFieldName = fieldName;
+            myReply = null;
+            myMessage = message;
+        }
+
+        /**
+         * {@inheritDoc}
+         * <p>
+         * Overridden to reply based on the results.
+         * </p>
+         */
+        @Override
+        public void callback(final T result) {
+            final JsonObject reply = (myReply != null) ? myReply.copy()
+                    : new JsonObject();
+            reply.putNumber(myFieldName, result);
+
+            sendOK(myMessage, reply);
+        }
+
+        /**
+         * {@inheritDoc}
+         * <p>
+         * Overridden to reply that there was an error.
+         * </p>
+         */
+        @Override
+        public void exception(final Throwable thrown) {
+            sendError(myMessage, thrown);
         }
     }
 
     /**
      * SimpleBatchingCallback provides the logic to handle batching results to
      * the client.
-     * 
+     *
      * @api.no This class is <b>NOT</b> part of the drivers API. This class may
      *         be mutated in incompatible ways between any two releases of the
      *         driver.
      * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
      */
     protected final class SimpleBatchingCallback implements
-            StreamCallback<Document> {
+    StreamCallback<Document> {
 
         /** The control for the cursor. */
         protected MongoStreamCursorControl myCursorControl;
@@ -894,7 +1077,7 @@ public class MongoPersistor extends BusModBase implements
 
         /**
          * Creates a new SimpleBatchingCallback.
-         * 
+         *
          * @param message
          *            The original request message.
          * @param batchSize
@@ -903,12 +1086,12 @@ public class MongoPersistor extends BusModBase implements
          *            The number of milliseconds to wait for a client to ask for
          *            the next batch.
          */
-        public SimpleBatchingCallback(Message<JsonObject> message,
-                int batchSize, int timeoutMS) {
+        public SimpleBatchingCallback(final Message<JsonObject> message,
+                final int batchSize, final int timeoutMS) {
             myMessage = message;
             myBatchSize = batchSize;
             myTimeoutMS = timeoutMS;
-            myPending = new ConcurrentLinkedQueue<Document>();
+            myPending = new ConcurrentLinkedQueue<>();
         }
 
         /**
@@ -919,7 +1102,7 @@ public class MongoPersistor extends BusModBase implements
          * </p>
          */
         @Override
-        public void callback(Document result) {
+        public void callback(final Document result) {
             myPending.offer(result);
 
             if (myBatchSize <= myPending.size()) {
@@ -943,37 +1126,38 @@ public class MongoPersistor extends BusModBase implements
          * <p>
          * Remembers the error.
          * </p>
-         * 
+         *
          * @param thrown
          *            The thrown exception.
          */
         @Override
-        public void exception(Throwable thrown) {
+        public void exception(final Throwable thrown) {
             myError = thrown;
             sendBatch(true);
         }
 
         /**
          * Sets the control object for the streaming cursor.
-         * 
+         *
          * @param cursor
          *            The cursor to control.
          */
-        public void setCursor(MongoStreamCursorControl cursor) {
+        public void setCursor(final MongoStreamCursorControl cursor) {
             myCursorControl = cursor;
         }
 
         /**
          * Create the message for a batch of documents.
-         * 
+         *
          * @param status
          *            The status of the batch.
          * @param results
          *            The raw results.
          * @return The JsonObject result.
          */
-        private JsonObject createBatchMessage(String status, JsonArray results) {
-            JsonObject reply = new JsonObject();
+        private JsonObject createBatchMessage(final String status,
+                final JsonArray results) {
+            final JsonObject reply = new JsonObject();
 
             reply.putArray("results", results);
             reply.putString("status", status);
@@ -984,27 +1168,28 @@ public class MongoPersistor extends BusModBase implements
 
         /**
          * Sends the next batch of messages to the client.
-         * 
+         *
          * @param done
          *            Set to true on a terminal event.
          */
-        private void sendBatch(boolean done) {
+        private void sendBatch(final boolean done) {
             myCursorControl.pause();
 
             if (done && (myError != null)) {
                 sendError(myMessage, myError);
             }
 
-            JsonArray results = new JsonArray();
+            final JsonArray results = new JsonArray();
             Document doc = null;
             while ((results.size() < myBatchSize)
-                    && (doc = myPending.poll()) != null) {
-                JsonObject m = convert(doc);
+                    && ((doc = myPending.poll()) != null)) {
+                final JsonObject m = convert(doc);
                 results.add(m);
             }
 
-            String status = (done && (myError == null)) ? "ok" : "more-exist";
-            JsonObject reply = createBatchMessage(status, results);
+            final String status = (done && (myError == null)) ? "ok"
+                    : "more-exist";
+            final JsonObject reply = createBatchMessage(status, results);
             if (done) {
                 sendOK(myMessage, reply);
             }
@@ -1012,17 +1197,17 @@ public class MongoPersistor extends BusModBase implements
                 // If the user doesn't reply within timeout, close the cursor
                 final long timerID = getVertx().setTimer(myTimeoutMS,
                         new Handler<Long>() {
-                            @Override
-                            public void handle(Long id) {
-                                getContainer().logger().warn(
-                                        "Closing MongoDB cursor on timeout");
-                                myCursorControl.close();
-                            }
-                        });
+                    @Override
+                    public void handle(final Long id) {
+                        getContainer().logger().warn(
+                                "Closing MongoDB cursor on timeout");
+                        myCursorControl.close();
+                    }
+                });
 
                 myMessage.reply(reply, new Handler<Message<JsonObject>>() {
                     @Override
-                    public void handle(Message<JsonObject> msg) {
+                    public void handle(final Message<JsonObject> msg) {
                         getVertx().cancelTimer(timerID);
 
                         myMessage = msg;
@@ -1031,182 +1216,6 @@ public class MongoPersistor extends BusModBase implements
                     }
                 });
             }
-        }
-    }
-
-    /**
-     * DocumentCallback provides the callback for actions returning a single
-     * document.
-     * 
-     * @api.no This class is <b>NOT</b> part of the drivers API. This class may
-     *         be mutated in incompatible ways between any two releases of the
-     *         driver.
-     * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
-     */
-    protected final class DocumentCallback implements Callback<Document> {
-
-        /** The name of the reply field. */
-        private final String myFieldName;
-
-        /** The original message. */
-        private final Message<JsonObject> myMessage;
-
-        /** The reply to the request. */
-        private final JsonObject myReply;
-
-        /**
-         * Creates a new DocumentCallback.
-         * 
-         * @param reply
-         *            The reply to the request.
-         * @param message
-         *            The original message.
-         */
-        public DocumentCallback(JsonObject reply, Message<JsonObject> message) {
-            myReply = reply;
-            myMessage = message;
-            myFieldName = "result";
-        }
-
-        /**
-         * Creates a new DocumentCallback.
-         * 
-         * @param message
-         *            The original message.
-         */
-        public DocumentCallback(Message<JsonObject> message) {
-            this((JsonObject) null, message);
-        }
-
-        /**
-         * Creates a new DocumentCallback.
-         * 
-         * @param fieldName
-         *            The name of the field in the reply.
-         * @param message
-         *            The original message.
-         */
-        public DocumentCallback(String fieldName, Message<JsonObject> message) {
-            myReply = null;
-            myMessage = message;
-            myFieldName = fieldName;
-        }
-
-        /**
-         * {@inheritDoc}
-         * <p>
-         * Overridden to reply based on the results.
-         * </p>
-         */
-        @Override
-        public void callback(Document result) {
-            JsonObject reply = (myReply != null) ? myReply.copy()
-                    : new JsonObject();
-            if (result != null) {
-                reply.putObject(myFieldName, convert(result));
-            }
-            // else leave the field blank so it is 'undefined'.
-
-            sendOK(myMessage, reply);
-        }
-
-        /**
-         * {@inheritDoc}
-         * <p>
-         * Overridden to reply that there was an error.
-         * </p>
-         */
-        @Override
-        public void exception(Throwable thrown) {
-            sendError(myMessage, thrown);
-        }
-    }
-
-    /**
-     * ResultCallback provides the callback for most actions.
-     * 
-     * @param <T>
-     *            The expected response type.
-     * 
-     * @api.no This class is <b>NOT</b> part of the drivers API. This class may
-     *         be mutated in incompatible ways between any two releases of the
-     *         driver.
-     * @copyright 2015, Allanbank Consulting, Inc., All Rights Reserved
-     */
-    protected final class ResultCallback<T extends Number> implements
-            Callback<T> {
-
-        /** The name of the reply value field. */
-        private final String myFieldName;
-
-        /** The original message. */
-        private final Message<JsonObject> myMessage;
-
-        /** The reply to the request. */
-        private final JsonObject myReply;
-
-        /**
-         * Creates a new ResultCallback.
-         * 
-         * @param reply
-         *            The reply to the request.
-         * @param message
-         *            The original message.
-         */
-        public ResultCallback(JsonObject reply, Message<JsonObject> message) {
-            myFieldName = "number";
-            myReply = reply;
-            myMessage = message;
-        }
-
-        /**
-         * Creates a new ResultCallback.
-         * 
-         * @param message
-         *            The original message.
-         */
-        public ResultCallback(Message<JsonObject> message) {
-            this((JsonObject) null, message);
-        }
-
-        /**
-         * Creates a new ResultCallback.
-         * 
-         * @param fieldName
-         *            The field name for the value.
-         * @param message
-         *            The original message.
-         */
-        public ResultCallback(String fieldName, Message<JsonObject> message) {
-            myFieldName = fieldName;
-            myReply = null;
-            myMessage = message;
-        }
-
-        /**
-         * {@inheritDoc}
-         * <p>
-         * Overridden to reply based on the results.
-         * </p>
-         */
-        @Override
-        public void callback(T result) {
-            JsonObject reply = (myReply != null) ? myReply.copy()
-                    : new JsonObject();
-            reply.putNumber(myFieldName, result);
-
-            sendOK(myMessage, reply);
-        }
-
-        /**
-         * {@inheritDoc}
-         * <p>
-         * Overridden to reply that there was an error.
-         * </p>
-         */
-        @Override
-        public void exception(Throwable thrown) {
-            sendError(myMessage, thrown);
         }
     }
 }

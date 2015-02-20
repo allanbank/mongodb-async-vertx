@@ -69,8 +69,7 @@ public class Converter {
 
     /** The fields for strict encoded {@link BinaryElement}. */
     public static final Set<String> BINARY_FIELDS = Collections
-            .unmodifiableSet(new HashSet<String>(Arrays.asList("$binary",
-                    "$type")));
+            .unmodifiableSet(new HashSet<>(Arrays.asList("$binary", "$type")));
 
     /** The fields for strict encoded {@link TimestampElement}. */
     public static final Set<String> DATE_FIELDS = Collections
@@ -97,8 +96,7 @@ public class Converter {
 
     /** The fields for strict encoded {@link RegularExpressionElement}. */
     public static final Set<String> REGEX_FIELDS = Collections
-            .unmodifiableSet(new HashSet<String>(Arrays.asList("$regex",
-                    "$options")));
+            .unmodifiableSet(new HashSet<>(Arrays.asList("$regex", "$options")));
 
     /** The fields for strict encoded {@link MongoTimestampElement}. */
     public static final Set<String> TIMESTAMP_FIELDS = Collections
@@ -106,7 +104,7 @@ public class Converter {
 
     /** The sub-fields for strict encoded {@link MongoTimestampElement}. */
     public static final Set<String> TIMESTAMP_SUB_FIELDS = Collections
-            .unmodifiableSet(new HashSet<String>(Arrays.asList("t", "i")));
+            .unmodifiableSet(new HashSet<>(Arrays.asList("t", "i")));
 
     /** The default time zone. */
     public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
@@ -128,11 +126,11 @@ public class Converter {
                 break;
             }
             case BINARY: {
-                BinaryElement binary = (BinaryElement) e;
+                final BinaryElement binary = (BinaryElement) e;
 
                 array.addObject(new JsonObject().putString("$binary",
                         IOUtils.toBase64(binary.getValue())).putString("$type",
-                        Integer.toHexString(binary.getSubType())));
+                                Integer.toHexString(binary.getSubType())));
                 break;
             }
             case BOOLEAN: {
@@ -254,14 +252,14 @@ public class Converter {
                 break;
             }
             case BINARY: {
-                BinaryElement binary = (BinaryElement) e;
+                final BinaryElement binary = (BinaryElement) e;
 
                 obj.putObject(
                         e.getName(),
                         new JsonObject().putString("$binary",
                                 IOUtils.toBase64(binary.getValue())).putString(
-                                "$type",
-                                Integer.toHexString(binary.getSubType())));
+                                        "$type",
+                                        Integer.toHexString(binary.getSubType())));
                 break;
             }
             case BOOLEAN: {
@@ -317,7 +315,7 @@ public class Converter {
 
                 obj.putObject(e.getName(), new JsonObject().putObject(
                         "$timestamp", new JsonObject().putNumber("t", time)
-                                .putNumber("i", increment)));
+                        .putNumber("i", increment)));
                 break;
             }
             case NULL: {
@@ -339,7 +337,7 @@ public class Converter {
 
                 obj.putObject(e.getName(),
                         new JsonObject().putString("$regex", pattern)
-                                .putString("$options", options));
+                        .putString("$options", options));
                 break;
             }
             case STRING: {
@@ -399,22 +397,50 @@ public class Converter {
     }
 
     /**
+     * Converts the {@link JsonArray} and append the results to the
+     * {@link ArrayBuilder}.
+     *
+     * @param arrayBuilder
+     *            The builder to populate.
+     * @param array
+     *            The raw {@link JsonArray}.
+     */
+    protected static void convert(final ArrayBuilder arrayBuilder,
+            final JsonArray array) {
+        final int size = array.size();
+        for (int i = 0; i < size; ++i) {
+            final Object value = array.get(i);
+
+            if (value instanceof JsonArray) {
+                convert(arrayBuilder.pushArray(), (JsonArray) value);
+            }
+            else if (value instanceof JsonObject) {
+                arrayBuilder.add(toElement("0", (JsonObject) value));
+            }
+            else {
+                arrayBuilder.add(value);
+            }
+        }
+    }
+
+    /**
      * Converts the {@link JsonObject} to an {@link Element} by interpreting the
      * document structures.
-     * 
+     *
      * @param fieldName
      *            The name of the element.
      * @param json
      *            The JSON document to interpret.
      * @return The Element.
      */
-    private static final Element toElement(String fieldName, JsonObject json) {
+    private static final Element toElement(final String fieldName,
+            final JsonObject json) {
         final Set<String> fieldNames = json.getFieldNames();
         if (BINARY_FIELDS.equals(fieldNames)) {
             // "$binary", "$type"
             return new BinaryElement(fieldName, (byte) Integer.parseInt(
                     json.getString("$type"), 16), IOUtils.base64ToBytes(json
-                    .getString("$binary")));
+                            .getString("$binary")));
         }
         else if (DATE_FIELDS.equals(fieldNames)) {
             // $date
@@ -439,7 +465,8 @@ public class Converter {
                 final long time = subObject.getLong("t");
                 final long incr = subObject.getLong("i");
 
-                return  new MongoTimestampElement(fieldName, (time << Integer.SIZE) | incr);
+                return new MongoTimestampElement(fieldName,
+                        (time << Integer.SIZE) | incr);
             }
         }
         else if (REGEX_FIELDS.equals(fieldNames)) {
@@ -467,33 +494,6 @@ public class Converter {
         }
 
         return new DocumentElement(fieldName, convert(json));
-    }
-
-    /**
-     * Converts the {@link JsonArray} and append the results to the
-     * {@link ArrayBuilder}.
-     *
-     * @param arrayBuilder
-     *            The builder to populate.
-     * @param array
-     *            The raw {@link JsonArray}.
-     */
-    protected static void convert(final ArrayBuilder arrayBuilder,
-            final JsonArray array) {
-        final int size = array.size();
-        for (int i = 0; i < size; ++i) {
-            final Object value = array.get(i);
-
-            if (value instanceof JsonArray) {
-                convert(arrayBuilder.pushArray(), (JsonArray) value);
-            }
-            else if (value instanceof JsonObject) {
-                arrayBuilder.add(toElement("0", (JsonObject) value));
-            }
-            else {
-                arrayBuilder.add(value);
-            }
-        }
     }
 
     /**
